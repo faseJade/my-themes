@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.fasejade.mythemes" android:versionCode="5" android:versionName="0.5.0">
+    package="com.fasejade.mythemes" android:versionCode="6" android:versionName="0.6.0">
     <uses-sdk android:minSdkVersion="30" android:targetSdkVersion="35" />
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <!-- Lets the app list launcher apps so we can link icons to them; no extra permission. -->
     <queries>
         <intent>

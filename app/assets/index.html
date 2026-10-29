@@ -69,8 +69,10 @@ function home() {
       <div><b>${esc(t.name)}</b><p class="muted">${t.icons.length} icons and a wallpaper, ${kb(sum(t))}</p></div></a>`).join("")}</section>
     <p class="muted">New themes arrive as an app update and show up in this list.</p>
     <section style="display:grid;gap:10px"><h2>Home screen</h2><p>My Themes can be your home screen, so every icon uses your theme.</p>
-      <button class="primary" id="home">Use My Themes as home screen</button>
-      <p class="muted">Pick "My Themes Home" on the next screen. To go back, pick "One UI Home" there.</p></section>`;
+      <button class="primary" id="try">Try the new home screen</button>
+      <button id="home">Use it as my home screen</button>
+      <p class="muted">Trying it changes nothing: press Home to go back to One UI. To switch for real, pick "My Themes Home" on the next screen; to switch back later, pick "One UI Home" there.</p></section>`;
+  view.querySelector("#try").onclick = () => window.App ? App.tryHome() : toast("This only works inside the app.");
   view.querySelector("#home").onclick = () => window.App ? App.homeSettings() : toast("This only works inside the app.");
 }
 

@@ -149,6 +149,11 @@ public class MainActivity extends Activity {
         }
 
         @JavascriptInterface
+        public void tryHome() {
+            startActivity(new Intent(MainActivity.this, HomeActivity.class));
+        }
+
+        @JavascriptInterface
         public void homeSettings() {
             startActivity(new Intent(Settings.ACTION_HOME_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }

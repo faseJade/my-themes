@@ -29,6 +29,8 @@ for f in sorted(glob.glob("themes/*.json")):
     t["links"] = {c[len("ComponentInfo{"):-1]: res(t["id"], app) for app, cs in links.items() for c in cs}
     assert t["icons"] and t["wallpaper"], f"{t['id']} has no icons or wallpaper"
     assert len({i[2] for i in t["icons"]}) == len(t["icons"]), "drawable names must be unique"
+    # Same links for the native launcher, one "package/activity=drawable" per line.
+    open(f"app/assets/themes/{t['id']}/links.txt", "w").write("".join(f"{c}={r}\n" for c, r in t["links"].items()))
     themes.append(t)
 unknown = set(links) - {i[0] for i in themes[0]["icons"]}
 assert not unknown, f"components.txt names apps with no icon: {unknown}"
