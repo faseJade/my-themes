@@ -1,10 +1,12 @@
 #!/bin/sh
-# Inside the container: SVG -> PNG -> 16-colour palette -> lossless squeeze.
+# Inside the container: SVG -> PNG -> small palette -> lossless squeeze.
 set -e
-for f in src/*.svg; do
-  n=$(basename "$f" .svg)
-  rsvg-convert "$f" -o "out/$n.png"
-  pngquant --force --skip-if-larger --quality 70-100 16 --output "out/$n.png" "out/$n.png" || true
-  oxipng -q -o max --strip all "out/$n.png"
-done
-ls -l out
+mkdir -p out/icons
+render() { # $1 svg, $2 png, $3 colours
+  rsvg-convert "$1" -o "$2"
+  pngquant --force --skip-if-larger --quality 60-100 "$3" --output "$2" "$2" || true
+  oxipng -q -o max --strip all "$2"
+}
+render src/wallpaper.svg out/wallpaper.png 16
+for f in src/icons/*.svg; do render "$f" "out/icons/$(basename "$f" .svg).png" 8; done
+ls -l out/wallpaper.png; du -cb out/icons/*.png | tail -1
