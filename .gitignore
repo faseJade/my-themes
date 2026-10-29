@@ -1,1 +1,6 @@
 out/*.png
+out/icons/
+app/build/
+app/assets/themes/
+app/assets/themes.js
+keys/

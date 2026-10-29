@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Themes</title>
+<style>
+/* Layout: dashboard of theme cards; a theme page shows stats, a phone preview, actions, then the full icon sheet. */
+@font-face { font-family: "Chakra Petch"; font-weight: 700; src: url(fonts/ChakraPetch-Bold.woff2) format("woff2"); }
+:root { --bg:#080604; --panel:#140d07; --line:#3a2414; --amber:#FF8A24; --copper:#8F451B; --text:#FFD2A6; --muted:#A08670;
+  --display:"Chakra Petch", ui-monospace, monospace; --body:system-ui, sans-serif; --mono:ui-monospace, monospace; color-scheme:dark }
+* { box-sizing:border-box }
+body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 var(--body); -webkit-tap-highlight-color:transparent }
+main { padding:20px 16px 48px; display:grid; gap:28px; max-width:720px; margin:0 auto }
+h1 { font:700 34px/1.05 var(--display); color:var(--amber); margin:0 0 8px; text-wrap:balance }
+h2 { font:700 20px/1.2 var(--display); color:var(--amber); margin:0 0 12px }
+p { margin:0 }
+.muted { color:var(--muted); font-size:13px }
+.stats { display:flex; flex-wrap:wrap; gap:24px; margin-top:16px; font-variant-numeric:tabular-nums }
+.stats b { display:block; font:700 28px/1 var(--display); color:var(--amber) }
+.stats span { color:var(--muted); font-size:12px }
+.cards { display:grid; gap:14px }
+.card { display:grid; grid-template-columns:96px 1fr; gap:14px; align-items:center; padding:10px; border:1.5px solid var(--line); border-radius:20px; color:inherit; text-decoration:none; background:var(--panel) }
+.card:active { border-color:var(--amber) }
+.card img { width:96px; height:140px; object-fit:cover; object-position:center 55%; border-radius:12px }
+.card b { font:700 20px/1.1 var(--display); color:var(--amber); display:block; margin-bottom:4px }
+.back { color:var(--amber); text-decoration:none; font-size:15px; display:inline-block; padding:8px 0; min-height:44px }
+.phone { width:220px; aspect-ratio:1440/3120; border:2px solid var(--copper); border-radius:30px; background:var(--bg) center/cover; position:relative; overflow:hidden; justify-self:center }
+.phone .row { position:absolute; left:7%; right:7%; bottom:5%; display:grid; grid-template-columns:repeat(4,1fr); gap:6px }
+.phone .row img { width:100% }
+.acts { display:grid; gap:10px }
+.seg { display:grid; grid-template-columns:repeat(3,1fr); gap:8px }
+button { font:600 15px var(--body); min-height:48px; border-radius:14px; border:1.5px solid var(--copper); background:transparent; color:var(--text); cursor:pointer }
+button.primary { background:var(--amber); border-color:var(--amber); color:var(--bg) }
+button:focus-visible, a:focus-visible { outline:2px solid var(--text); outline-offset:2px }
+.sw { list-style:none; margin:0; padding:0; display:grid; gap:8px }
+.sw button { width:100%; display:grid; grid-template-columns:22px 1fr auto; gap:12px; align-items:center; text-align:left; padding:0 14px; font-weight:400 }
+.sw i { width:22px; height:22px; border-radius:6px; border:1px solid var(--line) }
+.sw code { font:13px var(--mono); color:var(--muted) }
+.sheet { display:grid; grid-template-columns:repeat(auto-fill,minmax(88px,1fr)); gap:18px 8px }
+.sheet figure { margin:0; display:grid; justify-items:center; gap:6px; text-align:center; font-size:12px; line-height:1.25 }
+.sheet img { width:60px; height:60px }
+.sheet small { display:block; font:11px var(--mono); color:var(--muted) }
+#toast { position:fixed; left:16px; right:16px; bottom:24px; padding:14px 16px; border-radius:14px; background:var(--text); color:var(--bg); font-weight:600; text-align:center }
+</style>
+</head>
+<body>
+<main id="view"></main>
+<div id="toast" role="status" hidden></div>
+<script src="themes.js"></script>
+<script>
+const T = window.THEMES || [], view = document.getElementById("view"), toastEl = document.getElementById("toast");
+const kb = b => (b / 1024).toFixed(b < 10240 ? 1 : 0) + " KB";
+const sum = t => t.wallpaper + t.icons.reduce((a, i) => a + i[1], 0);
+const src = (t, f) => "themes/" + t.id + "/" + f;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+let timer;
+function toast(msg) { toastEl.textContent = msg; toastEl.hidden = false; clearTimeout(timer); timer = setTimeout(() => toastEl.hidden = true, 2600); }
+function run(fn, ...args) { toast(window.App ? App[fn](...args) : "This only works inside the app."); }
+
+function home() {
+  const total = T.reduce((a, t) => a + sum(t), 0);
+  view.innerHTML = `<section><h1>My Themes</h1><p>Your own themes. No ads, no store.</p>
+    <div class="stats"><div><b>${T.length}</b><span>${T.length === 1 ? "theme" : "themes"}</span></div><div><b>${kb(total)}</b><span>all themes together</span></div></div></section>
+    <section class="cards">${T.map(t => `<a class="card" href="#t-${t.id}"><img src="${src(t, "wallpaper.png")}" alt="">
+      <div><b>${esc(t.name)}</b><p class="muted">${t.icons.length} icons and a wallpaper, ${kb(sum(t))}</p></div></a>`).join("")}</section>
+    <p class="muted">New themes arrive as an app update and show up in this list.</p>`;
+}
+
+function theme(t) {
+  const dock = ["Phone", "Messages", "Chrome", "Camera"].filter(n => t.icons.some(i => i[0] === n));
+  const iconBytes = t.icons.reduce((a, i) => a + i[1], 0);
+  view.innerHTML = `<a class="back" href="#">‹ All themes</a>
+    <section><h1>${esc(t.name)}</h1><p>${esc(t.about)}</p>
+      <div class="stats"><div><b>${kb(iconBytes)}</b><span>${t.icons.length} icons</span></div><div><b>${kb(iconBytes / t.icons.length)}</b><span>average icon</span></div><div><b>${kb(t.wallpaper)}</b><span>wallpaper</span></div></div></section>
+    <div class="phone" style="background-image:url('${src(t, "wallpaper.png")}')" role="img" aria-label="Home screen preview">
+      <div class="row">${dock.map(n => `<img src="${src(t, "icons/" + n + ".png")}" alt="">`).join("")}</div></div>
+    <section class="acts"><h2>Wallpaper</h2><div class="seg">
+      <button data-w="home">Home</button><button data-w="lock">Lock</button><button class="primary" data-w="both">Both</button></div></section>
+    <section class="acts"><h2>Icons</h2><button class="primary" id="save">Save icons to Gallery</button>
+      <p class="muted">Then in Theme Park, choose each app's icon from the "${esc(t.name)}" album.</p></section>
+    <section><h2>Theme Park colours</h2><ul class="sw">${t.colours.map(([n, h]) => `<li><button data-c="${h}"><i style="background:${h}"></i><span>${esc(n)}</span><code>${h}</code></button></li>`).join("")}</ul>
+      <p class="muted" style="margin-top:8px">Tap a colour to copy it.</p></section>
+    <section><h2>All icons</h2><div class="sheet">${t.icons.map(([n, b]) => `<figure><img src="${src(t, "icons/" + n + ".png")}" alt="" loading="lazy"><figcaption>${esc(n)}<small>${kb(b)}</small></figcaption></figure>`).join("")}</div></section>`;
+  view.querySelectorAll("[data-w]").forEach(b => b.onclick = () => run("setWallpaper", t.id, b.dataset.w));
+  view.querySelector("#save").onclick = () => run("saveIcons", t.id, t.name);
+  view.querySelectorAll("[data-c]").forEach(b => b.onclick = () => run("copy", b.dataset.c));
+}
+
+function route() {
+  const t = T.find(x => "#t-" + x.id === location.hash);
+  t ? theme(t) : home();
+  scrollTo(0, 0);
+}
+addEventListener("hashchange", route);
+route();
+</script>
+</body>
+</html>

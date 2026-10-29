@@ -1,0 +1,102 @@
+package com.fasejade.mythemes;
+
+import android.app.Activity;
+import android.app.WallpaperManager;
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.ContentValues;
+import android.graphics.Insets;
+import android.net.Uri;
+import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
+import android.view.WindowInsets;
+import java.io.InputStream;
+import java.io.OutputStream;
+
+// The whole UI is assets/index.html; this class only hosts it and does the jobs a web page cannot.
+public class MainActivity extends Activity {
+    private WebView web;
+
+    @Override
+    protected void onCreate(Bundle state) {
+        super.onCreate(state);
+        web = new WebView(this);
+        web.setBackgroundColor(0xFF080604);
+        web.getSettings().setJavaScriptEnabled(true);
+        web.addJavascriptInterface(new Bridge(), "App");
+        // Android 15 draws apps under the status and navigation bars; keep the page clear of them.
+        web.setOnApplyWindowInsetsListener((v, in) -> {
+            Insets i = in.getInsets(WindowInsets.Type.systemBars());
+            v.setPadding(i.left, i.top, i.right, i.bottom);
+            return WindowInsets.CONSUMED;
+        });
+        setContentView(web);
+        if (state == null) web.loadUrl("file:///android_asset/index.html");
+        else web.restoreState(state);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle out) {
+        super.onSaveInstanceState(out);
+        web.saveState(out);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (web.canGoBack()) web.goBack();
+        else super.onBackPressed();
+    }
+
+    // Theme ids come from our own page, but they become asset paths, so only allow plain ids.
+    private static String themeDir(String id) {
+        if (id == null || !id.matches("[a-z0-9-]+")) throw new IllegalArgumentException("bad theme id");
+        return "themes/" + id;
+    }
+
+    private class Bridge {
+        @JavascriptInterface
+        public String setWallpaper(String id, String where) {
+            int flags = "home".equals(where) ? WallpaperManager.FLAG_SYSTEM
+                    : "lock".equals(where) ? WallpaperManager.FLAG_LOCK
+                    : WallpaperManager.FLAG_SYSTEM | WallpaperManager.FLAG_LOCK;
+            try (InputStream in = getAssets().open(themeDir(id) + "/wallpaper.png")) {
+                WallpaperManager.getInstance(MainActivity.this).setStream(in, null, true, flags);
+                return "Wallpaper set";
+            } catch (Exception e) {
+                return "Could not set the wallpaper: " + e.getMessage();
+            }
+        }
+
+        // Saves every icon to Pictures/<folder> so Theme Park can pick them from the gallery. No permission needed.
+        @JavascriptInterface
+        public String saveIcons(String id, String folder) {
+            try {
+                String dir = themeDir(id) + "/icons";
+                String[] names = getAssets().list(dir);
+                for (String name : names) {
+                    ContentValues v = new ContentValues();
+                    v.put(MediaStore.Images.Media.DISPLAY_NAME, name);
+                    v.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
+                    v.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + folder);
+                    Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, v);
+                    try (InputStream in = getAssets().open(dir + "/" + name);
+                         OutputStream out = getContentResolver().openOutputStream(uri)) {
+                        in.transferTo(out);
+                    }
+                }
+                return names.length + " icons saved to Pictures/" + folder;
+            } catch (Exception e) {
+                return "Could not save the icons: " + e.getMessage();
+            }
+        }
+
+        @JavascriptInterface
+        public String copy(String text) {
+            ((ClipboardManager) getSystemService(CLIPBOARD_SERVICE)).setPrimaryClip(ClipData.newPlainText("colour", text));
+            return "Copied " + text;
+        }
+    }
+}
