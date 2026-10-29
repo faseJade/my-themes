@@ -98,6 +98,20 @@ public class MainActivity extends Activity {
             }
         }
 
+        // Samsung lets only Theme Park apply icons and system colours, so the best an app can do is open it.
+        @JavascriptInterface
+        public String openThemePark() {
+            String pkg = "com.samsung.android.themedesigner";
+            Intent i = getPackageManager().getLaunchIntentForPackage(pkg);
+            if (i == null) i = new Intent(Intent.ACTION_VIEW, Uri.parse("samsungapps://ProductDetail/" + pkg));
+            try {
+                startActivity(i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                return "ok";
+            } catch (Exception e) {
+                return "Theme Park is not installed. Get Good Lock from Galaxy Store first.";
+            }
+        }
+
         // Copies "Label=ComponentInfo{package/activity}" for every app in the drawer, so icons can be linked exactly.
         @JavascriptInterface
         public String copyAppList() {

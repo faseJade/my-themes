@@ -77,8 +77,10 @@ function theme(t) {
       <div class="stats"><div><b>${kb(iconBytes)}</b><span>${t.icons.length} icons</span></div><div><b>${kb(iconBytes / t.icons.length)}</b><span>average icon</span></div><div><b>${kb(t.wallpaper)}</b><span>wallpaper</span></div></div></section>
     <div class="phone" style="background-image:url('${src(t, "wallpaper.png")}')" role="img" aria-label="Home screen preview">
       <div class="row">${dock.map(n => `<img src="${ico(t.icons.find(i => i[0] === n))}" alt="">`).join("")}</div></div>
+    <section class="acts"><button class="primary" id="apply">Apply theme</button>
+      <p class="muted">Sets the wallpaper, then opens Theme Park. There, tap Icon, Create new, the gift button, then My Themes.</p></section>
     <section class="acts"><h2>Wallpaper</h2><div class="seg">
-      <button data-w="home">Home</button><button data-w="lock">Lock</button><button class="primary" data-w="both">Both</button></div></section>
+      <button data-w="home">Home</button><button data-w="lock">Lock</button><button data-w="both">Both</button></div></section>
     <section class="acts"><h2>Icon pack</h2>
       <p>${t.linked} of ${t.icons.length} icons are linked to your apps.</p>
       ${t.linked ? `<p class="muted">In Theme Park: Icon, Create new, tap the icon-pack button, pick My Themes.</p>`
@@ -89,6 +91,13 @@ function theme(t) {
       <p class="muted" style="margin-top:8px">Tap a colour to copy it.</p></section>
     <section><h2>All icons</h2><div class="sheet">${t.icons.map(i => `<figure><img src="${ico(i)}" alt="" loading="lazy"><figcaption>${esc(i[0])}<small>${kb(i[1])}</small></figcaption></figure>`).join("")}</div></section>`;
   view.querySelectorAll("[data-w]").forEach(b => b.onclick = () => run("setWallpaper", t.id, b.dataset.w));
+  view.querySelector("#apply").onclick = () => {
+    if (!window.App) return toast("This only works inside the app.");
+    const w = App.setWallpaper(t.id, "both");
+    if (w !== "Wallpaper set") return toast(w);
+    const p = App.openThemePark();
+    toast(p === "ok" ? "Wallpaper set. Now apply the icons in Theme Park." : p);
+  };
   view.querySelector("#apps").onclick = () => run("copyAppList");
   view.querySelector("#save").onclick = () => run("saveIcons", t.icons.map(i => i[2] + "|" + i[0]).join("\n"), t.name);
   view.querySelectorAll("[data-c]").forEach(b => b.onclick = () => run("copy", b.dataset.c));
