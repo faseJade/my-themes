@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.fasejade.mythemes" android:versionCode="2" android:versionName="0.2.0">
+    package="com.fasejade.mythemes" android:versionCode="3" android:versionName="0.3.0">
     <uses-sdk android:minSdkVersion="30" android:targetSdkVersion="35" />
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <!-- Lets the app list launcher apps so we can link icons to them; no extra permission. -->
