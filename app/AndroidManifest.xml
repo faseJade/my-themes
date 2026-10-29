@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.fasejade.mythemes" android:versionCode="4" android:versionName="0.4.0">
+    package="com.fasejade.mythemes" android:versionCode="5" android:versionName="0.5.0">
     <uses-sdk android:minSdkVersion="30" android:targetSdkVersion="35" />
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
     <!-- Lets the app list launcher apps so we can link icons to them; no extra permission. -->
@@ -27,6 +27,18 @@
                 <action android:name="com.anddoes.launcher.THEME" />
                 <action android:name="com.gau.go.launcherex.theme" />
                 <action android:name="org.adw.launcher.icons.ACTION_PICK_ICON" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <!-- The home screen. Same app, so it can use the theme's icons and wallpaper directly. -->
+        <activity android:name=".HomeActivity" android:exported="true" android:label="My Themes Home"
+            android:theme="@style/Home" android:launchMode="singleTask" android:stateNotNeeded="true"
+            android:excludeFromRecents="true" android:clearTaskOnLaunch="true"
+            android:configChanges="orientation|screenSize|screenLayout|uiMode|keyboardHidden"
+            android:windowSoftInputMode="adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.WallpaperManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ComponentName;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
@@ -12,16 +13,20 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.provider.Settings;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebView;
 import android.view.WindowInsets;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.TreeSet;
+import org.json.JSONArray;
 
 // The whole UI is assets/index.html; this class only hosts it and does the jobs a web page cannot.
 public class MainActivity extends Activity {
-    private WebView web;
+    protected WebView web;
+
+    protected String page() { return "index.html"; }
 
     @Override
     protected void onCreate(Bundle state) {
@@ -37,7 +42,7 @@ public class MainActivity extends Activity {
             return WindowInsets.CONSUMED;
         });
         setContentView(web);
-        if (state == null) web.loadUrl("file:///android_asset/index.html");
+        if (state == null) web.loadUrl("file:///android_asset/" + page());
         else web.restoreState(state);
     }
 
@@ -110,6 +115,47 @@ public class MainActivity extends Activity {
             } catch (Exception e) {
                 return "Theme Park is not installed. Get Good Lock from Galaxy Store first.";
             }
+        }
+
+        // Every app in the drawer as [label, "package/activity"], for the home screen.
+        @JavascriptInterface
+        public String apps() {
+            Intent i = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
+            JSONArray out = new JSONArray();
+            for (ResolveInfo r : getPackageManager().queryIntentActivities(i, 0))
+                out.put(new JSONArray().put(r.loadLabel(getPackageManager()).toString())
+                        .put(r.activityInfo.packageName + "/" + r.activityInfo.name));
+            return out.toString();
+        }
+
+        @JavascriptInterface
+        public String launch(String component) {
+            ComponentName c = ComponentName.unflattenFromString(component);
+            if (c == null) return "Unknown app";
+            try {
+                startActivity(new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(c)
+                        .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED));
+                return "ok";
+            } catch (Exception e) {
+                return "Could not open the app";
+            }
+        }
+
+        @JavascriptInterface
+        public void appInfo(String component) {
+            ComponentName c = ComponentName.unflattenFromString(component);
+            if (c != null) startActivity(new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:" + c.getPackageName())).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
+
+        @JavascriptInterface
+        public void homeSettings() {
+            startActivity(new Intent(Settings.ACTION_HOME_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }
+
+        @JavascriptInterface
+        public void openThemes() {
+            startActivity(new Intent(MainActivity.this, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
 
         // Copies "Label=ComponentInfo{package/activity}" for every app in the drawer, so icons can be linked exactly.

@@ -9,6 +9,7 @@
 @font-face { font-family: "Chakra Petch"; font-weight: 700; src: url(fonts/ChakraPetch-Bold.woff2) format("woff2"); }
 :root { --bg:#080604; --panel:#140d07; --line:#3a2414; --amber:#FF8A24; --copper:#8F451B; --text:#FFD2A6; --muted:#A08670;
   --display:"Chakra Petch", ui-monospace, monospace; --body:system-ui, sans-serif; --mono:ui-monospace, monospace; color-scheme:dark }
+[hidden] { display:none !important }
 * { box-sizing:border-box }
 body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 var(--body); -webkit-tap-highlight-color:transparent }
 main { padding:20px 16px 48px; display:grid; gap:28px; max-width:720px; margin:0 auto }
@@ -66,7 +67,11 @@ function home() {
     <div class="stats"><div><b>${T.length}</b><span>${T.length === 1 ? "theme" : "themes"}</span></div><div><b>${kb(total)}</b><span>all themes together</span></div></div></section>
     <section class="cards">${T.map(t => `<a class="card" href="#t-${t.id}"><img src="${src(t, "wallpaper.png")}" alt="">
       <div><b>${esc(t.name)}</b><p class="muted">${t.icons.length} icons and a wallpaper, ${kb(sum(t))}</p></div></a>`).join("")}</section>
-    <p class="muted">New themes arrive as an app update and show up in this list.</p>`;
+    <p class="muted">New themes arrive as an app update and show up in this list.</p>
+    <section style="display:grid;gap:10px"><h2>Home screen</h2><p>My Themes can be your home screen, so every icon uses your theme.</p>
+      <button class="primary" id="home">Use My Themes as home screen</button>
+      <p class="muted">Pick "My Themes Home" on the next screen. To go back, pick "One UI Home" there.</p></section>`;
+  view.querySelector("#home").onclick = () => window.App ? App.homeSettings() : toast("This only works inside the app.");
 }
 
 function theme(t) {
