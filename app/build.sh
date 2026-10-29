@@ -6,7 +6,7 @@ SDK=${ANDROID_HOME:-$HOME/Android}; BT=$SDK/build-tools/35.0.0; JAR=$SDK/platfor
 KS=keys/mythemes.jks
 python3 -I src/make_app_assets.py
 cd app && rm -rf build && mkdir -p build/classes build/gen
-"$BT/aapt2" compile --dir res -o build/res.zip
+"$BT/aapt2" compile --no-crunch --dir res -o build/res.zip  # no-crunch keeps our already-squeezed PNGs
 "$BT/aapt2" link -o build/unsigned.apk -I "$JAR" --manifest AndroidManifest.xml -A assets --java build/gen build/res.zip
 javac -nowarn -source 17 -target 17 -cp "$JAR" -d build/classes $(find src build/gen -name '*.java') 2>&1 | grep -v "bootstrap classpath\|^1 warning" || true
 "$BT/d8" --release --lib "$JAR" --min-api 30 --output build $(find build/classes -name '*.class')

@@ -5,6 +5,8 @@ import android.app.WallpaperManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.ContentValues;
+import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.graphics.Insets;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import android.webkit.WebView;
 import android.view.WindowInsets;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.TreeSet;
 
 // The whole UI is assets/index.html; this class only hosts it and does the jobs a web page cannot.
 public class MainActivity extends Activity {
@@ -70,27 +73,40 @@ public class MainActivity extends Activity {
             }
         }
 
-        // Saves every icon to Pictures/<folder> so Theme Park can pick them from the gallery. No permission needed.
+        // Saves the given icons ("drawable|App name" per line) to Pictures/<folder> for Theme Park. No permission needed.
         @JavascriptInterface
-        public String saveIcons(String id, String folder) {
+        public String saveIcons(String icons, String folder) {
             try {
-                String dir = themeDir(id) + "/icons";
-                String[] names = getAssets().list(dir);
-                for (String name : names) {
+                String[] lines = icons.split("\n");
+                for (String line : lines) {
+                    String[] p = line.split("\\|", 2);
+                    int id = getResources().getIdentifier(p[0], "drawable", getPackageName());
+                    if (id == 0) throw new IllegalArgumentException("no icon " + p[0]);
                     ContentValues v = new ContentValues();
-                    v.put(MediaStore.Images.Media.DISPLAY_NAME, name);
+                    v.put(MediaStore.Images.Media.DISPLAY_NAME, p[1] + ".png");
                     v.put(MediaStore.Images.Media.MIME_TYPE, "image/png");
                     v.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/" + folder);
                     Uri uri = getContentResolver().insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, v);
-                    try (InputStream in = getAssets().open(dir + "/" + name);
+                    try (InputStream in = getResources().openRawResource(id);
                          OutputStream out = getContentResolver().openOutputStream(uri)) {
                         in.transferTo(out);
                     }
                 }
-                return names.length + " icons saved to Pictures/" + folder;
+                return lines.length + " icons saved to Pictures/" + folder;
             } catch (Exception e) {
                 return "Could not save the icons: " + e.getMessage();
             }
+        }
+
+        // Copies "Label=ComponentInfo{package/activity}" for every app in the drawer, so icons can be linked exactly.
+        @JavascriptInterface
+        public String copyAppList() {
+            Intent i = new Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER);
+            TreeSet<String> lines = new TreeSet<>();
+            for (ResolveInfo r : getPackageManager().queryIntentActivities(i, 0))
+                lines.add(r.loadLabel(getPackageManager()) + "=ComponentInfo{" + r.activityInfo.packageName + "/" + r.activityInfo.name + "}");
+            copy(String.join("\n", lines));
+            return lines.size() + " apps copied. Paste them to Claude.";
         }
 
         @JavascriptInterface

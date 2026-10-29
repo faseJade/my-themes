@@ -53,6 +53,8 @@ const T = window.THEMES || [], view = document.getElementById("view"), toastEl =
 const kb = b => (b / 1024).toFixed(b < 10240 ? 1 : 0) + " KB";
 const sum = t => t.wallpaper + t.icons.reduce((a, i) => a + i[1], 0);
 const src = (t, f) => "themes/" + t.id + "/" + f;
+// Icons live once, as app drawables; outside the app (a desktop preview) they come from the build output.
+const ico = i => window.App ? "file:///android_res/drawable/" + i[2] + ".png" : "../../out/icons/" + i[0] + ".png";
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
 let timer;
 function toast(msg) { toastEl.textContent = msg; toastEl.hidden = false; clearTimeout(timer); timer = setTimeout(() => toastEl.hidden = true, 2600); }
@@ -74,16 +76,21 @@ function theme(t) {
     <section><h1>${esc(t.name)}</h1><p>${esc(t.about)}</p>
       <div class="stats"><div><b>${kb(iconBytes)}</b><span>${t.icons.length} icons</span></div><div><b>${kb(iconBytes / t.icons.length)}</b><span>average icon</span></div><div><b>${kb(t.wallpaper)}</b><span>wallpaper</span></div></div></section>
     <div class="phone" style="background-image:url('${src(t, "wallpaper.png")}')" role="img" aria-label="Home screen preview">
-      <div class="row">${dock.map(n => `<img src="${src(t, "icons/" + n + ".png")}" alt="">`).join("")}</div></div>
+      <div class="row">${dock.map(n => `<img src="${ico(t.icons.find(i => i[0] === n))}" alt="">`).join("")}</div></div>
     <section class="acts"><h2>Wallpaper</h2><div class="seg">
       <button data-w="home">Home</button><button data-w="lock">Lock</button><button class="primary" data-w="both">Both</button></div></section>
-    <section class="acts"><h2>Icons</h2><button class="primary" id="save">Save icons to Gallery</button>
-      <p class="muted">Then in Theme Park, choose each app's icon from the "${esc(t.name)}" album.</p></section>
+    <section class="acts"><h2>Icon pack</h2>
+      <p>${t.linked} of ${t.icons.length} icons are linked to your apps.</p>
+      ${t.linked ? `<p class="muted">In Theme Park: Icon, Create new, tap the icon-pack button, pick My Themes.</p>`
+        : `<p class="muted">Step 1: tap below and paste the list to Claude. The next app update links every icon.</p>`}
+      <button class="${t.linked ? "" : "primary"}" id="apps">Copy my app list</button>
+      <button id="save">Save icons to Gallery instead</button></section>
     <section><h2>Theme Park colours</h2><ul class="sw">${t.colours.map(([n, h]) => `<li><button data-c="${h}"><i style="background:${h}"></i><span>${esc(n)}</span><code>${h}</code></button></li>`).join("")}</ul>
       <p class="muted" style="margin-top:8px">Tap a colour to copy it.</p></section>
-    <section><h2>All icons</h2><div class="sheet">${t.icons.map(([n, b]) => `<figure><img src="${src(t, "icons/" + n + ".png")}" alt="" loading="lazy"><figcaption>${esc(n)}<small>${kb(b)}</small></figcaption></figure>`).join("")}</div></section>`;
+    <section><h2>All icons</h2><div class="sheet">${t.icons.map(i => `<figure><img src="${ico(i)}" alt="" loading="lazy"><figcaption>${esc(i[0])}<small>${kb(i[1])}</small></figcaption></figure>`).join("")}</div></section>`;
   view.querySelectorAll("[data-w]").forEach(b => b.onclick = () => run("setWallpaper", t.id, b.dataset.w));
-  view.querySelector("#save").onclick = () => run("saveIcons", t.id, t.name);
+  view.querySelector("#apps").onclick = () => run("copyAppList");
+  view.querySelector("#save").onclick = () => run("saveIcons", t.icons.map(i => i[2] + "|" + i[0]).join("\n"), t.name);
   view.querySelectorAll("[data-c]").forEach(b => b.onclick = () => run("copy", b.dataset.c));
 }
 

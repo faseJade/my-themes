@@ -1,0 +1,2 @@
+# App name (as in src/icons.txt) = ComponentInfo{package/activity}, one line per app on the phone.
+# Filled from the "Copy my app list" button in the app.

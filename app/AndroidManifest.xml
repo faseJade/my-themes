@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.fasejade.mythemes" android:versionCode="1" android:versionName="0.1.0">
+    package="com.fasejade.mythemes" android:versionCode="2" android:versionName="0.2.0">
     <uses-sdk android:minSdkVersion="30" android:targetSdkVersion="35" />
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
+    <!-- Lets the app list launcher apps so we can link icons to them; no extra permission. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+            <category android:name="android.intent.category.LAUNCHER" />
+        </intent>
+    </queries>
     <application android:label="My Themes" android:icon="@mipmap/ic_launcher"
         android:theme="@style/App" android:allowBackup="false">
         <activity android:name=".MainActivity" android:exported="true"
@@ -10,6 +17,16 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- Standard icon-pack actions; Theme Park and launchers find icon packs through these. -->
+            <intent-filter>
+                <action android:name="org.adw.launcher.THEMES" />
+                <action android:name="com.novalauncher.THEME" />
+                <action android:name="com.teslacoilsw.launcher.THEME" />
+                <action android:name="com.anddoes.launcher.THEME" />
+                <action android:name="com.gau.go.launcherex.theme" />
+                <action android:name="org.adw.launcher.icons.ACTION_PICK_ICON" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
     </application>

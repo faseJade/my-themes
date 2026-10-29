@@ -4,3 +4,6 @@ app/build/
 app/assets/themes/
 app/assets/themes.js
 keys/
+app/res/drawable-nodpi/
+app/res/xml/
+app/assets/appfilter.xml
