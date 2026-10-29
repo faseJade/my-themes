@@ -1,4 +1,4 @@
-# Flipper theme colours (for Theme Park)
+# Amber Pocket colours
 
 | Use | Hex |
 |---|---|
@@ -11,4 +11,4 @@
 Theme Park menu names change a little with each One UI version. Any setting that asks for
 "background" gets `#080604`, any "accent/primary/highlight" gets `#FF8A24`.
 
-Wallpaper: `out/wallpaper.png` (1440x3120). Use it for both the home and lock screen.
+Wallpaper: built to `out/wallpaper.png` (1440x3120).

@@ -10,7 +10,7 @@ def cell(a, label=True):
     lab = f'<span>{html.escape(a)}</span>' if label else ""
     return f'<figure><img src="{uri(icons[a])}" alt="{html.escape(a)} icon" width="96" height="96">{lab}</figure>'
 grid = "".join(f'<figure><img src="{uri(icons[a])}" alt="" width="96" height="96"><figcaption>{html.escape(a)}<small>{size[a]/1024:.1f} KB</small></figcaption></figure>' for a in apps)
-page = f'''<title>Flipper Theme Icons</title>
+page = f'''<title>Amber Pocket Icons</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono&display=swap">
 <style>

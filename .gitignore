@@ -1,5 +1,4 @@
-out/*.png
-out/icons/
+out/
 app/build/
 app/assets/themes/
 app/assets/themes.js

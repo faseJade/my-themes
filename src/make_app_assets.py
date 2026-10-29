@@ -1,6 +1,6 @@
 # Packs each theme into the app: wallpaper in assets, icons as drawables (one copy, used by both the
 # dashboard and the icon pack), appfilter.xml linking icons to apps, and app/assets/themes.js.
-# shortcut: only flipper-amber has generators, so every theme reads out/, and the icon pack only serves the first
+# shortcut: only amber-pocket has generators, so every theme reads out/, and the icon pack only serves the first
 # theme; give each theme its own out/<id>/ and a "which theme is the icon pack" switch when adding a second one.
 import glob, json, os, re, shutil
 res = lambda tid, app: re.sub(r"[^a-z0-9]+", "_", f"{tid} {app}".lower()).strip("_")
